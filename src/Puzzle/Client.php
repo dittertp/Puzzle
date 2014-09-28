@@ -1,6 +1,6 @@
 <?php
 
-namespace Puzzle\Client;
+namespace Puzzle;
 
 use Puzzle\Interfaces\ClientInterface;
 use Puzzle\Exceptions\ConfigurationException;
