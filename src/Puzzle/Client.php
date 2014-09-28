@@ -456,7 +456,7 @@ class Client
 
         $hostString = $this->prepareHost($scheme, $host);
 
-        if ($port !== false) {
+        if (!is_null($port)) {
             $hostString = $hostString . ":" . $port;
         }
 
