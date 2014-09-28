@@ -184,7 +184,8 @@ class Client
 		curl_close($this->handle);
 		return $this->response_object;
 	}
-*/
+
+
     protected function httpParseMessage($res)
     {
 
@@ -209,7 +210,8 @@ class Client
 				' with response: [' . $res . ']', $code);
 		}
 	}
-
+*/
+    
     /**
      * Return's http status response code
      *
