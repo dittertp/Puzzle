@@ -255,12 +255,12 @@ class Client
         }
     }
 
-    protected function processRequest($method, $method, $uri, $params = null, $body = null)
+    protected function processRequest($method, $uri, $params = null, $body = null)
     {
         $methodString = strtolower($method) . "Request";
 
         if (method_exists($this, $methodString)) {
-            return $this->$methodString($uri, $params, $body);
+            return $this->$methodString($method, $uri, $params, $body);
         } else {
             throw new InvalidRequestMethodException("invalid request method or not implemented");
         }
@@ -351,7 +351,11 @@ class Client
             throw new ClientException("Error setting cURL Header options.");
         }
 
-        return curl_exec($this->getHandle());
+
+        $response["data"] = curl_exec($this->getHandle());
+        $response["statusCode"] = $this->getStatusCode();
+
+        return $response;
     }
 
     /**
@@ -480,6 +484,7 @@ class Client
         if (strpos($host, self::SCHEME_PLAIN) === 0) {
             return substr($host, strlen(self::SCHEME_PLAIN));
         }
+        return $host;
     }
 
     protected function getScheme()
