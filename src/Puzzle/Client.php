@@ -5,13 +5,19 @@ namespace Puzzle\Client;
 use Puzzle\Interfaces\ClientInterface;
 use Puzzle\Exceptions\ConfigurationException;
 use Puzzle\Exceptions\ClientErrorResponseException;
+use Puzzle\Exceptions\ClientException;
 use Puzzle\Exceptions\ServerErrorResponseException;
 use Puzzle\Exceptions\ServerErrorException;
 use Puzzle\Exceptions\InvalidRequestMethodException;
 use Puzzle\Exceptions\InvalidRequestException;
 
-class Client implements ClientInterface
+//class Client implements ClientInterface
+class Client
 {
+
+    const SCHEME_SSL = "https://";
+
+    const SCHEME_PLAIN = "http://";
 
 	protected $handle;
 
@@ -22,6 +28,8 @@ class Client implements ClientInterface
 	protected $host;
 
     protected $port;
+
+    protected $scheme;
 
 	public function __construct()
     {
@@ -44,6 +52,7 @@ class Client implements ClientInterface
         $this->port = null;
         $this->host = null;
 
+        $this->scheme = self::SCHEME_PLAIN;
         $this->httpOptions = array();
         $this->httpOptions[CURLOPT_RETURNTRANSFER] = true;
         $this->httpOptions[CURLOPT_FOLLOWLOCATION] = false;
@@ -103,6 +112,7 @@ class Client implements ClientInterface
         curl_close($this->getHandle());
     }
 
+    /*
     public function get($url, $http_options = array())
     {
 		$http_options = array_merge($this->http_options, $http_options);
@@ -161,42 +171,41 @@ class Client implements ClientInterface
 
     public function delete($url, $http_options = array())
     {
-		$http_options = array_merge($this->http_options, $http_options);
 		$http_options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
 		$this->handle = curl_init($url);
 
-		if(! curl_setopt_array($this->handle, $http_options)){
+		if(! curl_setopt_array($this->handle, $this->getOptions())){
 			throw new RestClientException("Error setting cURL request options.");
 		}
 
-		$this->response_object = curl_exec($this->handle);
+		$response = curl_exec($this->handle);
 		$this->http_parse_message($this->response_object);
 
 		curl_close($this->handle);
 		return $this->response_object;
 	}
-
-    private function httpParseMessage($res)
+*/
+    protected function httpParseMessage($res)
     {
 
 		if(! $res){
-			throw new HttpServerException(curl_error($this->handle), -1);
+			throw new ServerErrorException(curl_error($this->getHandle()), -1);
 		}
 
-		$this->response_info = curl_getinfo($this->handle);
-		$code = $this->response_info['http_code'];
+		$responseInfo = curl_getinfo($this->getHandle());
+		$code = $responseInfo['http_code'];
 
 		if($code == 404) {
-			throw new HttpServerException404(curl_error($this->handle));
+			throw new ServerErrorException(curl_error($this->getHandle()));
 		}
 
 		if($code >= 400 && $code <=600) {
-			throw new HttpServerException('Server response status was: ' . $code .
+			throw new ServerErrorException('Server response status was: ' . $code .
 				' with response: [' . $res . ']', $code);
 		}
 
 		if(!in_array($code, range(200,207))) {
-			throw new HttpServerException('Server response status was: ' . $code .
+			throw new ServerErrorException('Server response status was: ' . $code .
 				' with response: [' . $res . ']', $code);
 		}
 	}
@@ -211,6 +220,20 @@ class Client implements ClientInterface
         return curl_getinfo($this->getHandle(), CURLINFO_HTTP_CODE);
     }
 
+    /**
+     * performs the request
+     *
+     * @param string $method request method
+     * @param string $uri    uri string
+     * @param mixed  $params optional query string parameters
+     * @param mixed  $body   "post" body
+     *
+     * @return mixed
+     * @throws \Exception
+     * @throws \Puzzle\Exceptions\ServerErrorResponseException
+     * @throws \Exception
+     * @throws \Puzzle\Exceptions\ClientErrorResponseException
+     */
     public function performRequest($method, $uri, $params = null, $body = null)
     {
         try {
@@ -241,55 +264,235 @@ class Client implements ClientInterface
         }
     }
 
+    /**
+     * get request implementation
+     *
+     * @param string $method the request method
+     * @param string $uri    the uri
+     * @param string $params optional query string parameters
+     * @param string $body   body/post parameters
+     *
+     * @return string
+     * @throws \Puzzle\Exceptions\InvalidRequestException
+     */
     protected function getRequest($method, $uri, $params, $body)
     {
+        // get requests has no specific necessary requirements
 
+        return $this->execute($method, $uri, $params, $body);
     }
 
+    /**
+     * post request implementation
+     *
+     * @param string $method the request method
+     * @param string $uri    the uri
+     * @param string $params optional query string parameters
+     * @param string $body   body/post parameters
+     *
+     * @return string
+     * @throws \Puzzle\Exceptions\InvalidRequestException
+     */
     protected function postRequest($method, $uri, $params, $body)
     {
+        // post requests has no specific necessary requirements
 
+        return $this->execute($method, $uri, $params, $body);
     }
 
+    /**
+     * put request implementation
+     *
+     * @param string $method the request method
+     * @param string $uri    the uri
+     * @param string $params optional query string parameters
+     * @param string $body   body/post parameters
+     *
+     * @return string
+     * @throws \Puzzle\Exceptions\InvalidRequestException
+     */
     protected function putRequest($method, $uri, $params, $body)
     {
         if (is_null($body)) {
-            throw new InvalidRequestException("body is required for 'put' requests");
+            throw new InvalidRequestException("body is required for '{$method}' requests");
         }
 
         // put requests requires content-length header
         $this->setHttpHeader('Content-Length: ' . strlen($body));
-        $this->setMethod("put");
+
+        return $this->execute($method, $uri, $params, $body);
+    }
+
+    /**
+     * Executes the curl request
+     *
+     * @param string $method the request method
+     * @param string $uri    the uri
+     * @param string $params optional query string parameters
+     * @param string $body   body/post parameters
+     *
+     * @return mixed
+     * @throws \Puzzle\Exceptions\ClientException
+     */
+    protected function execute($method, $uri, $params, $body)
+    {
+        $this->setMethod(strtoupper($method));
         $url = $this->buildUrl($uri, $params);
         $this->setUrl($url);
         $this->setBody($body);
 
+        if (!curl_setopt_array($this->getHandle(), $this->getOptions())) {
+            throw new ClientException("Error setting cURL request options.");
+        }
 
+        if (!curl_setopt($this->getHandle(), CURLOPT_HTTPHEADER, $this->getHttpHeaders())) {
+            throw new ClientException("Error setting cURL Header options.");
+        }
 
-
-
-
+        return curl_exec($this->getHandle());
     }
+
+    /**
+     * Enables ssl for the connection
+     *
+     * @param bool $strict optional value if ssl should be strict (check server certificate)
+     *
+     * @return void
+     */
+    public function enableSSL($strict = false)
+    {
+        $this->setScheme(self::SCHEME_SSL);
+        if ($strict === false) {
+            $this->setOption(CURLOPT_SSL_VERIFYPEER, 0);
+            $this->setOption(CURLOPT_SSL_VERIFYHOST, 0);
+        } else {
+            $this->setOption(CURLOPT_SSL_VERIFYPEER, 0);
+            $this->setOption(CURLOPT_SSL_VERIFYHOST, 1);
+        }
+    }
+
+    /**
+     * Disables ssl for the connection
+     *
+     * @return void
+     */
+    public function disableSSL()
+    {
+        $this->scheme = self::SCHEME_PLAIN;
+    }
+
+    /**
+     * Sets the http/https scheme string
+     *
+     * @param string $scheme http/http scheme string
+     *
+     * @return void
+     */
+    protected function setScheme($scheme)
+    {
+        $this->scheme = $scheme;
+    }
+
+    /**
+     * Sets a http option (e.g. use strict ssl)
+     *
+     * @param int    $key   the curl option key
+     * @param mixed  $value the value to set
+     *
+     * @return void
+     */
+    protected function setOption($key, $value)
+    {
+        $this->httpOptions[$key] = $value;
+    }
+
+    /**
+     * Returns all set http options as array
+     *
+     * @return array
+     */
+    protected function getOptions()
+    {
+        return $this->httpOptions;
+    }
+
+
 
     protected function buildUrl($uri, $params)
     {
-        $url="";
-        if (($host = $this->getHost()) !== false) {
-            $url = $host;
+        $host = $this->buildHostString();
+
+        if (strpos($uri, "/") !== 0) {
+            $uri = "/" . $uri;
         }
 
-        if (($port = $this->getPort()) !== false) {
-            $url = $url . ":" . $port;
-        }
-
-        $url = $url . $uri;
+        $url = $host . $uri;
 
         foreach ($params as $key => $value) {
             $url = $url . "?" . $key . "=" . $value;
         }
 
+        return $url;
+    }
 
+    protected function buildHostString()
+    {
+        $scheme = $this->getScheme();
+        $host = $this->getHost();
+        $port = $this->getPort();
 
+        if (is_null($host)) {
+            throw new ConfigurationException("no host was set");
+        }
+
+        $hostString = $this->prepareHost($scheme, $host);
+
+        if ($port !== false) {
+            $hostString = $hostString . ":" . $port;
+        }
+
+        return $hostString;
+    }
+
+    protected function prepareHost($scheme, $host)
+    {
+        if (is_null($host)) {
+            throw new ConfigurationException("no host was set");
+        }
+
+        $host = $this->stripScheme($host);
+
+        if (substr($host, -1) === "/") {
+            $host = substr($host, 0, -1);
+        }
+
+        return $scheme . $host;
+    }
+
+    protected function stripScheme($host)
+    {
+        if (strpos($host, self::SCHEME_SSL) === 0) {
+            return substr($host, strlen(self::SCHEME_SSL));
+        }
+
+        if (strpos($host, self::SCHEME_PLAIN) === 0) {
+            return substr($host, strlen(self::SCHEME_PLAIN));
+        }
+    }
+
+    protected function getScheme()
+    {
+        return $this->scheme;
+    }
+
+    protected function getHost()
+    {
+        return $this->host;
+    }
+
+    protected function getPort()
+    {
+        return $this->port;
     }
 
     protected function setUrl($url)
