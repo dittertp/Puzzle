@@ -514,6 +514,10 @@ class Client
 
     protected function setBody($body)
     {
+        if (is_array($body)) {
+            $body = json_encode($body);
+        }
+
         curl_setopt($this->getHandle(), CURLOPT_POSTFIELDS, $body);
     }
 
