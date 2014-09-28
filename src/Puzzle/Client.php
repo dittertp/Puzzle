@@ -78,7 +78,7 @@ class Client
      */
     public function setAuthentication($username, $password)
     {
-        $this->httpOptions[CURLOPT_USERPWD] = $username . ": " . $password;
+        $this->httpOptions[CURLOPT_USERPWD] = $username . ":" . $password;
     }
 
     /**
