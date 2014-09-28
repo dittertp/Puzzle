@@ -239,9 +239,9 @@ class Client
     public function performRequest($method, $uri, $params = null, $body = null)
     {
         try {
-            if (is_array($body)) {
-                $body = json_encode($body);
-            }
+
+            // serialize(json) body if it's not already a string
+            $body = $this->serialize($body);
 
             return $this->processRequest(
                 $method,
@@ -255,6 +255,27 @@ class Client
 
         } catch (ServerErrorResponseException $exception) {
             throw $exception;   //We need 5xx errors to go straight to the user, no retries
+        }
+    }
+
+    /**
+     * Serialize assoc array into JSON string
+     *
+     * @param string|array $data Assoc array to encode into JSON
+     *
+     * @return string
+     */
+    public function serialize($data)
+    {
+        if (is_string($data) === true) {
+            return $data;
+        } else {
+            $data = json_encode($data);
+            if ($data === '[]') {
+                return '{}';
+            } else {
+                return $data;
+            }
         }
     }
 
