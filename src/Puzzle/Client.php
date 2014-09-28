@@ -1,5 +1,24 @@
 <?php
 
+/**
+ * Puzzle\Client
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * PHP version 5
+ *
+ * @category  Puzzle
+ * @package   TechDivision_Puzzle
+ * @author    Philipp Dittert <pd@techdivision.com>
+ * @copyright 2014 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
+ */
+
 namespace Puzzle;
 
 use Puzzle\Interfaces\ClientInterface;
@@ -11,36 +30,83 @@ use Puzzle\Exceptions\ServerErrorException;
 use Puzzle\Exceptions\InvalidRequestMethodException;
 use Puzzle\Exceptions\InvalidRequestException;
 
-//class Client implements ClientInterface
+/**
+ * class Client
+ *
+ * @category  Puzzle
+ * @package   TechDivision_Puzzle
+ * @author    Philipp Dittert <pd@techdivision.com>
+ * @copyright 2014 TechDivision GmbH <info@techdivision.com>
+ * @license   http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link      http://www.appserver.io
+ */
+
 class Client
 {
-
+    /**
+     * @var string
+     */
     const SCHEME_SSL = "https://";
 
+    /**
+     * @var string
+     */
     const SCHEME_PLAIN = "http://";
 
-	protected $handle;
+    /**
+     * @var resource
+     */
+    protected $handle;
 
-	protected $httpOptions;
+    /**
+     * @var array
+     */
+    protected $httpOptions;
 
+    /**
+     * @var array
+     */
     protected $httpHeaders;
 
-	protected $host;
+    /**
+     * @var string
+     */
+    protected $host;
 
+    /**
+     * @var integer
+     */
     protected $port;
 
+    /**
+     * @var string
+     */
     protected $scheme;
 
-	public function __construct()
+    /**
+     * creates class instance
+     */
+    public function __construct()
     {
         $this->init();
-	}
+    }
 
+    /**
+     * resets all attributes
+     *
+     * @return void
+     */
     public function reset()
     {
         $this->init();
     }
 
+    /**
+     * initialize default values
+     *
+     * @return void
+     * @throws Exceptions\ServerErrorException
+     */
     protected function init()
     {
         $handle = curl_init();
@@ -82,7 +148,7 @@ class Client
     }
 
     /**
-     *
+     * Sets hostname and optional port
      *
      * @param string  $host the hostname
      * @param integer $port the port
@@ -112,106 +178,6 @@ class Client
         curl_close($this->getHandle());
     }
 
-    /*
-    public function get($url, $http_options = array())
-    {
-		$http_options = array_merge($this->http_options, $http_options);
-		$this->handle = curl_init($url);
-
-		if(! curl_setopt_array($this->handle, $http_options)){
-			throw new RestClientException("Error setting cURL request options");
-		}
-
-		$this->response_object = curl_exec($this->handle);
-		$this->httpParseMessage($this->response_object);
-
-		curl_close($this->handle);
-		return $this->response_object;
-	}
-
-    public function post($url, $fields = array(), $http_options = array())
-    {
-		$http_options = array_merge($this->http_options, $http_options);
-		$http_options[CURLOPT_POST] = true;
-		$http_options[CURLOPT_POSTFIELDS] = $fields;
-		if(is_array($fields)){
-			$http_options[CURLOPT_HTTPHEADER] =
-				array('Content-Type: multipart/form-data');
-		}
-		$this->handle = curl_init($url);
-
-		if(! curl_setopt_array($this->handle, $http_options)){
-			throw new RestClientException("Error setting cURL request options.");
-		}
-
-		$this->response_object = curl_exec($this->handle);
-		$this->http_parse_message($this->response_object);
-
-		curl_close($this->handle);
-		return $this->response_object;
-	}
-
-    public function put($url, $data = '', $http_options = array())
-    {
-		$http_options = array_merge($this->http_options, $http_options);
-		$http_options[CURLOPT_CUSTOMREQUEST] = 'PUT';
-		$http_options[CURLOPT_POSTFIELDS] = $data;
-		$this->handle = curl_init($url);
-
-		if(! curl_setopt_array($this->handle, $http_options)){
-			throw new RestClientException("Error setting cURL request options.");
-		}
-
-		$this->response_object = curl_exec($this->handle);
-		$this->http_parse_message($this->response_object);
-
-		curl_close($this->handle);
-		return $this->response_object;
-	}
-
-    public function delete($url, $http_options = array())
-    {
-		$http_options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
-		$this->handle = curl_init($url);
-
-		if(! curl_setopt_array($this->handle, $this->getOptions())){
-			throw new RestClientException("Error setting cURL request options.");
-		}
-
-		$response = curl_exec($this->handle);
-		$this->http_parse_message($this->response_object);
-
-		curl_close($this->handle);
-		return $this->response_object;
-	}
-
-
-    protected function httpParseMessage($res)
-    {
-
-		if(! $res){
-			throw new ServerErrorException(curl_error($this->getHandle()), -1);
-		}
-
-		$responseInfo = curl_getinfo($this->getHandle());
-		$code = $responseInfo['http_code'];
-
-		if($code == 404) {
-			throw new ServerErrorException(curl_error($this->getHandle()));
-		}
-
-		if($code >= 400 && $code <=600) {
-			throw new ServerErrorException('Server response status was: ' . $code .
-				' with response: [' . $res . ']', $code);
-		}
-
-		if(!in_array($code, range(200,207))) {
-			throw new ServerErrorException('Server response status was: ' . $code .
-				' with response: [' . $res . ']', $code);
-		}
-	}
-*/
-
     /**
      * Return's http status response code
      *
@@ -231,9 +197,7 @@ class Client
      * @param mixed  $body   "post" body
      *
      * @return mixed
-     * @throws \Exception
      * @throws \Puzzle\Exceptions\ServerErrorResponseException
-     * @throws \Exception
      * @throws \Puzzle\Exceptions\ClientErrorResponseException
      */
     public function performRequest($method, $uri, $params = null, $body = null)
@@ -279,6 +243,17 @@ class Client
         }
     }
 
+    /**
+     * precess the request
+     *
+     * @param string $method the request method
+     * @param string $uri    the uri string
+     * @param array  $params the optional query string parameters
+     * @param string $body   the (post) body
+     *
+     * @return mixed
+     * @throws Exceptions\InvalidRequestMethodException
+     */
     protected function processRequest($method, $uri, $params = null, $body = null)
     {
         $methodString = strtolower($method) . "Request";
@@ -370,7 +345,7 @@ class Client
         if (!curl_setopt_array($this->getHandle(), $this->getOptions())) {
             throw new ClientException("Error setting cURL request options.");
         }
-        
+
         if (!is_null($this->getHttpHeaders())) {
             if (!curl_setopt($this->getHandle(), CURLOPT_HTTPHEADER, $this->getHttpHeaders())) {
                 throw new ClientException("Error setting cURL Header options.");
@@ -428,8 +403,8 @@ class Client
     /**
      * Sets a http option (e.g. use strict ssl)
      *
-     * @param int    $key   the curl option key
-     * @param mixed  $value the value to set
+     * @param int   $key   the curl option key
+     * @param mixed $value the value to set
      *
      * @return void
      */
@@ -448,8 +423,14 @@ class Client
         return $this->httpOptions;
     }
 
-
-
+    /**
+     * build complete url
+     *
+     * @param string $uri    uri string
+     * @param array  $params query string parameters
+     *
+     * @return string
+     */
     protected function buildUrl($uri, $params)
     {
         $host = $this->buildHostString();
@@ -467,6 +448,13 @@ class Client
         return $url;
     }
 
+    /**
+     * build host string (scheme - hostname/ip - (optional) port
+     *
+     * @return string
+     *
+     * @throws Exceptions\ConfigurationException
+     */
     protected function buildHostString()
     {
         $scheme = $this->getScheme();
@@ -486,6 +474,15 @@ class Client
         return $hostString;
     }
 
+    /**
+     * Adds given scheme to hostname
+     *
+     * @param string $scheme the http scheme
+     * @param string $host   the hostname
+     *
+     * @return string
+     * @throws Exceptions\ConfigurationException
+     */
     protected function prepareHost($scheme, $host)
     {
         if (is_null($host)) {
@@ -501,6 +498,13 @@ class Client
         return $scheme . $host;
     }
 
+    /**
+     * strip http/https scheme from hostname
+     *
+     * @param string $host the hostname
+     *
+     * @return string
+     */
     protected function stripScheme($host)
     {
         if (strpos($host, self::SCHEME_SSL) === 0) {
@@ -513,36 +517,79 @@ class Client
         return $host;
     }
 
+    /**
+     * Returns scheme string
+     *
+     * @return string
+     */
     protected function getScheme()
     {
         return $this->scheme;
     }
 
+    /**
+     * Returns hostname
+     *
+     * @return string
+     */
     protected function getHost()
     {
         return $this->host;
     }
 
+    /**
+     * Returns port
+     *
+     * @return int
+     */
     protected function getPort()
     {
         return $this->port;
     }
 
+    /**
+     * Sets given url as curl "url" parameter
+     *
+     * @param string $url complete url to query
+     *
+     * @return void
+     */
     protected function setUrl($url)
     {
         curl_setopt($this->getHandle(), CURLOPT_URL, $url);
     }
 
+    /**
+     * Sets given request method as curl "request" parameter
+     *
+     * @param string $value the request method
+     *
+     * @return void
+     */
     protected function setMethod($value)
     {
         curl_setopt($this->getHandle(), CURLOPT_CUSTOMREQUEST, $value);
     }
 
+    /**
+     * Sets given string as curl post body
+     *
+     * @param string $body the "post" body
+     *
+     * @return void
+     */
     protected function setBody($body)
     {
         curl_setopt($this->getHandle(), CURLOPT_POSTFIELDS, $body);
     }
 
+    /**
+     * Adds a new http header to header list
+     *
+     * @param string $header http header to set
+     *
+     * @return void
+     */
     protected function setHttpHeader($header)
     {
         $headers = $this->getHttpHeaders();
@@ -551,11 +598,23 @@ class Client
 
     }
 
+    /**
+     * Returns http headers as array
+     *
+     * @return array
+     */
     protected function getHttpHeaders()
     {
         return $this->httpHeaders;
     }
 
+    /**
+     * Saving given array of http headers to attributes
+     *
+     * @param array $headers http headers as array
+     *
+     * @return void
+     */
     protected function setHttpHeaders($headers)
     {
         $this->httpHeaders = $headers;
