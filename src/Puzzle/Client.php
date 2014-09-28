@@ -377,7 +377,7 @@ class Client
 
 
         $response["data"] = curl_exec($this->getHandle());
-        $response["statusCode"] = $this->getStatusCode();
+        $response["status"] = $this->getStatusCode();
 
         return $response;
     }
