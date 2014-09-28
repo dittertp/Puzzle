@@ -1,11 +1,17 @@
 {
-    "require": {
-        "elasticsearch/elasticsearch": "~1.0",
-        "mtdowling/cron-expression": "1.0.*"
-    },
+    "name": "techdivision/puzzle",
+    "description": "Curl PHP Client for Elasticsearch",
+    "keywords": ["search","client", "elasticsearch"],
+    "type": "library",
+    "license": "Apache 2",
+    "authors": [
+        {
+            "name": "Philipp Dittert"
+        }
+    ],
     "autoload": {
         "psr-0": {
-            "TechDivision\\Pnutch": [ "src/", "tests/" ]
+            "Puzzle": "src/"
         }
     }
 }

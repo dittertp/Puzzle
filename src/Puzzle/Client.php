@@ -211,7 +211,7 @@ class Client
 		}
 	}
 */
-    
+
     /**
      * Return's http status response code
      *
