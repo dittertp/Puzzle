@@ -371,6 +371,9 @@ class Client
             throw new ClientException("Error setting cURL request options.");
         }
 
+        error_log("schuch");
+        error_log(var_export($this->getHttpHeaders(),true));
+
         if (!curl_setopt($this->getHandle(), CURLOPT_HTTPHEADER, $this->getHttpHeaders())) {
             throw new ClientException("Error setting cURL Header options.");
         }
