@@ -239,6 +239,9 @@ class Client
     public function performRequest($method, $uri, $params = null, $body = null)
     {
         try {
+            if (is_array($body)) {
+                $body = json_encode($body);
+            }
 
             return $this->processRequest(
                 $method,
@@ -514,10 +517,6 @@ class Client
 
     protected function setBody($body)
     {
-        if (is_array($body)) {
-            $body = json_encode($body);
-        }
-
         curl_setopt($this->getHandle(), CURLOPT_POSTFIELDS, $body);
     }
 
