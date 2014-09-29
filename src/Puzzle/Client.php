@@ -261,7 +261,7 @@ class Client
         if (method_exists($this, $methodString)) {
             return $this->$methodString($method, $uri, $params, $body);
         } else {
-            throw new InvalidRequestMethodException("invalid request method or not implemented");
+            throw new InvalidRequestMethodException("invalid request method '{$method}' or not implemented");
         }
     }
 
@@ -279,6 +279,24 @@ class Client
     protected function getRequest($method, $uri, $params, $body)
     {
         // get requests has no specific necessary requirements
+
+        return $this->execute($method, $uri, $params, $body);
+    }
+
+    /**
+     * head request implementation
+     *
+     * @param string $method the request method
+     * @param string $uri    the uri
+     * @param string $params optional query string parameters
+     * @param string $body   body/post parameters
+     *
+     * @return string
+     * @throws \Puzzle\Exceptions\InvalidRequestException
+     */
+    protected function headRequest($method, $uri, $params, $body)
+    {
+        // head requests has no specific necessary requirements
 
         return $this->execute($method, $uri, $params, $body);
     }
