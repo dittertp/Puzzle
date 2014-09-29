@@ -22,6 +22,7 @@
 namespace Puzzle;
 
 use Puzzle\Interfaces\ClientInterface;
+use Puzzle\Interfaces\SerializerInterface;
 use Puzzle\Exceptions\ConfigurationException;
 use Puzzle\Exceptions\ClientErrorResponseException;
 use Puzzle\Exceptions\ClientException;
@@ -29,6 +30,7 @@ use Puzzle\Exceptions\ServerErrorResponseException;
 use Puzzle\Exceptions\ServerErrorException;
 use Puzzle\Exceptions\InvalidRequestMethodException;
 use Puzzle\Exceptions\InvalidRequestException;
+use Puzzle\Serializer\DefaultSerializer;
 
 /**
  * class Client
@@ -52,6 +54,11 @@ class Client
      * @var string
      */
     const SCHEME_PLAIN = "http://";
+
+    /**
+     * @var SerializerInterface
+     */
+    protected $serializer;
 
     /**
      * @var resource
@@ -118,10 +125,33 @@ class Client
         $this->port = null;
         $this->host = null;
 
+        $this->setSerializer(new DefaultSerializer());
         $this->scheme = self::SCHEME_PLAIN;
         $this->httpOptions = array();
         $this->httpOptions[CURLOPT_RETURNTRANSFER] = true;
         $this->httpOptions[CURLOPT_FOLLOWLOCATION] = false;
+    }
+
+    /**
+     * Sets a serializer instance
+     *
+     * @param SerializerInterface $serializer the serializer instance
+     *
+     * @return void
+     */
+    public function setSerializer(SerializerInterface $serializer)
+    {
+        $this->serializer = $serializer;
+    }
+
+    /**
+     * Returns serializer instance
+     *
+     * @return SerializerInterface
+     */
+    public function getSerializer()
+    {
+        return $this->serializer;
     }
 
     /**
@@ -205,7 +235,7 @@ class Client
         try {
 
             // serialize(json) body if it's not already a string
-            $body = $this->serialize($body);
+            $body = $this->getSerializer()->serialize($body);
 
             return $this->processRequest(
                 $method,
@@ -369,9 +399,9 @@ class Client
                 throw new ClientException("Error setting cURL Header options.");
             }
         }
-
-
-        $response["data"] = curl_exec($this->getHandle());
+        
+        $result = curl_exec($this->getHandle());
+        $response["data"] = $this->getSerializer()->deserialize($result);
         $response["status"] = $this->getStatusCode();
 
         return $response;
