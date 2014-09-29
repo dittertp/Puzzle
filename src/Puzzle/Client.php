@@ -253,27 +253,6 @@ class Client
     }
 
     /**
-     * Serialize assoc array into JSON string
-     *
-     * @param string|array $data Assoc array to encode into JSON
-     *
-     * @return string
-     */
-    public function serialize($data)
-    {
-        if (is_string($data) === true) {
-            return $data;
-        } else {
-            $data = json_encode($data);
-            if ($data === '[]') {
-                return '{}';
-            } else {
-                return $data;
-            }
-        }
-    }
-
-    /**
      * precess the request
      *
      * @param string $method the request method
@@ -399,7 +378,7 @@ class Client
                 throw new ClientException("Error setting cURL Header options.");
             }
         }
-        
+
         $result = curl_exec($this->getHandle());
         $response["data"] = $this->getSerializer()->deserialize($result);
         $response["status"] = $this->getStatusCode();
