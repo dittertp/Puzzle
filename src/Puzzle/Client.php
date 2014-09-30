@@ -293,6 +293,22 @@ class Client
     }
 
     /**
+     * delete request implementation
+     *
+     * @param string $method the request method
+     * @param string $uri    the uri
+     * @param string $params optional query string parameters
+     * @param string $body   body/post parameters
+     *
+     * @return string
+     * @throws \Puzzle\Exceptions\InvalidRequestException
+     */
+    protected function deleteRequest($method, $uri, $params, $body)
+    {
+        return $this->execute($method, $uri, $params, $body);
+    }
+
+    /**
      * head request implementation
      *
      * @param string $method the request method

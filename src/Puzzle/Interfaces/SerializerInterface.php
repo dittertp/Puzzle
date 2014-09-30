@@ -32,7 +32,7 @@ namespace Puzzle\Interfaces;
  * @link      http://www.appserver.io
  */
 
-Interface SerializerInterface
+interface SerializerInterface
 {
     /**
      * Serialize assoc array into JSON string
@@ -47,10 +47,8 @@ Interface SerializerInterface
      * Deserialize JSON into an assoc array
      *
      * @param string $data JSON encoded string
-     * @param array  $headers Response Headers
      *
      * @return array
      */
     public function deserialize($data);
-
 }
