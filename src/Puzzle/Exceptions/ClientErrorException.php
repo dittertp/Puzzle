@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Puzzle\Exceptions\ClientException
+ * Puzzle\Exceptions\ClientErrorException
  *
  * NOTICE OF LICENSE
  *
@@ -22,7 +22,7 @@
 namespace Puzzle\Exceptions;
 
 /**
- * class ClientException
+ * class ClientErrorException
  *
  * @category  Puzzle
  * @package   TechDivision_Puzzle
@@ -32,6 +32,6 @@ namespace Puzzle\Exceptions;
  * @link      http://www.appserver.io
  */
 
-class ClientException extends \Exception
+class ClientErrorException extends \Exception
 {
 }

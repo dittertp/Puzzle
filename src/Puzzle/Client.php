@@ -21,11 +21,13 @@
 
 namespace Puzzle;
 
+use Puzzle\Exceptions\ConnectionException;
 use Puzzle\Interfaces\ClientInterface;
 use Puzzle\Interfaces\SerializerInterface;
 use Puzzle\Exceptions\ConfigurationException;
 use Puzzle\Exceptions\ClientErrorResponseException;
-use Puzzle\Exceptions\ClientException;
+use Puzzle\Exceptions\ClientErrorException;
+use Puzzle\Exceptions\TransportException;
 use Puzzle\Exceptions\ServerErrorResponseException;
 use Puzzle\Exceptions\ServerErrorException;
 use Puzzle\Exceptions\InvalidRequestMethodException;
@@ -376,7 +378,9 @@ class Client
      * @param string $body   body/post parameters
      *
      * @return mixed
-     * @throws \Puzzle\Exceptions\ClientException
+     * @throws Exceptions\ClientErrorException
+     * @throws Exceptions\ServerErrorException
+     * @throws Exceptions\TransportException
      */
     protected function execute($method, $uri, $params, $body)
     {
@@ -386,20 +390,55 @@ class Client
         $this->setBody($body);
 
         if (!curl_setopt_array($this->getHandle(), $this->getOptions())) {
-            throw new ClientException("Error setting cURL request options.");
+            throw new TransportException("Error setting cURL request options.");
         }
 
         if (!is_null($this->getHttpHeaders())) {
             if (!curl_setopt($this->getHandle(), CURLOPT_HTTPHEADER, $this->getHttpHeaders())) {
-                throw new ClientException("Error setting cURL Header options.");
+                throw new TransportException("Error setting cURL Header options.");
             }
         }
 
         $result = curl_exec($this->getHandle());
+
+        $this->checkForCurlErrors();
+
         $response["data"] = $this->getSerializer()->deserialize($result);
         $response["status"] = $this->getStatusCode();
 
+
+        if ($response['status'] >= 400 && $response['status'] < 500) {
+
+            $statusCode = $response['status'];
+            $responseBody = $response["data"];
+            $exceptionText = "{$statusCode} Client Exception: {$responseBody}";
+
+            throw new ClientErrorException($exceptionText, $statusCode);
+
+        } else if ($response['status'] >= 500) {
+            $statusCode = $response['status'];
+            $responseBody = $response["data"];
+            $exceptionText = "{$statusCode} Server Exception: {$responseBody}";
+
+            throw new ServerErrorException($exceptionText, $statusCode);
+        }
+
+
         return $response;
+    }
+
+    /**
+     * checks if a  curl error occurred
+     *
+     * @return void
+     * @throws ConnectionException
+     */
+    protected function checkForCurlErrors()
+    {
+        if (curl_errno($this->getHandle())) {
+            $exceptionText = "Connection Error: " . curl_error($this->getHandle());
+            throw new ConnectionException($exceptionText);
+        }
     }
 
     /**
