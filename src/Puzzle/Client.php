@@ -672,7 +672,7 @@ class Client
      *
      * @return void
      */
-    protected function setHttpHeader($header)
+    public function setHttpHeader($header)
     {
         $headers = $this->getHttpHeaders();
         $headers[] = $header;
