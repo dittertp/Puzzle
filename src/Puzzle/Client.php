@@ -304,6 +304,22 @@ class Client
     }
 
     /**
+     * perform a patch
+     *
+     * @param string $uri    uri string
+     * @param mixed  $body   the "post" body
+     *
+     * @return mixed
+     * @throws ClientErrorResponseException
+     * @throws ServerErrorResponseException
+     * @throws \Exception
+     */
+    public function patch($uri, $body = null)
+    {
+        return $this->performRequest("patch", $uri, null, $body);
+    }
+
+    /**
      * perform a head request
      *
      * @param string $uri    uri string
@@ -439,6 +455,29 @@ class Client
      * @throws \Puzzle\Exceptions\InvalidRequestException
      */
     protected function putRequest($method, $uri, $params, $body)
+    {
+        if (is_null($body)) {
+            throw new InvalidRequestException("body is required for '{$method}' requests");
+        }
+
+        // put requests requires content-length header
+        $this->setHttpHeader('Content-Length: ' . strlen($body));
+
+        return $this->execute($method, $uri, $params, $body);
+    }
+
+    /**
+     * patch request implementation
+     *
+     * @param string $method the request method
+     * @param string $uri    the uri
+     * @param string $params optional query string parameters
+     * @param string $body   body/post parameters
+     *
+     * @return string
+     * @throws \Puzzle\Exceptions\InvalidRequestException
+     */
+    protected function patchRequest($method, $uri, $params, $body)
     {
         if (is_null($body)) {
             throw new InvalidRequestException("body is required for '{$method}' requests");
