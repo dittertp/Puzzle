@@ -255,6 +255,87 @@ class Client
     }
 
     /**
+     * perform a get request
+     *
+     * @param string $uri    uri string
+     * @param mixed  $params optional query string parameters
+     * @param mixed  $body   the "post" body
+     *
+     * @return mixed
+     * @throws ClientErrorResponseException
+     * @throws ServerErrorResponseException
+     * @throws \Exception
+     */
+    public function get($uri, $params = null, $body = null)
+    {
+        return $this->performRequest("get", $uri, $params, $body);
+    }
+
+    /**
+     * perform a put request
+     *
+     * @param string $uri    uri string
+     * @param mixed  $body   the "post" body
+     *
+     * @return mixed
+     * @throws ClientErrorResponseException
+     * @throws ServerErrorResponseException
+     * @throws \Exception
+     */
+    public function put($uri, $body = null)
+    {
+        return $this->performRequest("put", $uri, null, $body);
+    }
+
+    /**
+     * perform a post request
+     *
+     * @param string $uri    uri string
+     * @param mixed  $body   the "post" body
+     *
+     * @return mixed
+     * @throws ClientErrorResponseException
+     * @throws ServerErrorResponseException
+     * @throws \Exception
+     */
+    public function post($uri, $body = null)
+    {
+        return $this->performRequest("post", $uri, null, $body);
+    }
+
+    /**
+     * perform a head request
+     *
+     * @param string $uri    uri string
+     * @param mixed  $body   the "post" body
+     *
+     * @return mixed
+     * @throws ClientErrorResponseException
+     * @throws ServerErrorResponseException
+     * @throws \Exception
+     */
+    public function head($uri, $body = null)
+    {
+        return $this->performRequest("head", $uri, null, $body);
+    }
+
+    /**
+     * perform a delete request
+     *
+     * @param string $uri    uri string
+     * @param mixed  $body   the "post" body
+     *
+     * @return mixed
+     * @throws ClientErrorResponseException
+     * @throws ServerErrorResponseException
+     * @throws \Exception
+     */
+    public function delete($uri, $body = null)
+    {
+        return $this->performRequest("delete", $uri, null, $body);
+    }
+
+    /**
      * precess the request
      *
      * @param string $method the request method
