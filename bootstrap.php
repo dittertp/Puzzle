@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Puzzle\Exceptions\ConnectionException
+ * bootstrap
  *
  * NOTICE OF LICENSE
  *
@@ -19,19 +19,5 @@
  * @link      https://github.com/dittertp/Puzzle
  */
 
-namespace Puzzle\Exceptions;
-
-/**
- * class ConnectionException
- *
- * @category  Puzzle
- * @package   Puzzle
- * @author    Philipp Dittert <philipp.dittert@gmail.com>
- * @copyright 2015 Philipp Dittert
- * @license   http://www.gnu.org/licenses/gpl.txt GNU General Public License, version 3 (GPL-3.0)
- * @link      https://github.com/dittertp/Puzzle
- */
-
-class ConnectionException extends \Exception
-{
-}
+$loader = require 'vendor/autoload.php';
+$loader->add('Puzzle', 'src');

@@ -1,17 +1,26 @@
 {
-    "name": "dittertp/puzzle",
-    "description": "Curl PHP Client for Elasticsearch",
-    "keywords": ["search","client", "elasticsearch"],
-    "type": "library",
-    "license": "Apache 2",
-    "authors": [
-        {
-            "name": "Philipp Dittert"
-        }
-    ],
-    "autoload": {
-        "psr-0": {
-            "Puzzle": "src/"
-        }
-    }
+  "name": "dittertp/puzzle",
+  "description": "This curl rest client is a drop in replacement for guzzle while using the official php elasticsearch client",
+  "keywords": ["curl","client", "rest"],
+  "type": "library",
+  "license": "GNU General Public License, version 3 (GPL-3.0)",
+  "authors": [
+      {
+          "name": "Philipp Dittert"
+      }
+  ],
+  "require-dev" : {
+    "php" : ">=5.4.0",
+    "phpmd/phpmd" : "2.1.*",
+    "phploc/phploc" : "2.0.*",
+    "pdepend/pdepend" : "2.0.*",
+    "phpunit/phpunit" : "4.4.*",
+    "sebastian/phpcpd" : "2.0.*",
+    "squizlabs/php_codesniffer": "2.*"
+  },
+  "autoload": {
+      "psr-0": {
+          "Puzzle": "src/"
+      }
+  }
 }
