@@ -182,8 +182,8 @@ class Client
     /**
      * Sets hostname and optional port
      *
-     * @param string  $host the hostname
-     * @param integer $port the port
+     * @param string $host the hostname
+     * @param mixed  $port the port
      *
      * @return void
      * @throws \Puzzle\Exceptions\ConfigurationException
@@ -193,7 +193,7 @@ class Client
         $this->host = $host;
         if ($port !== null) {
             if (is_numeric($port)) {
-                $this->port = $port;
+                $this->port = (int) $port;
             } else {
                 throw new ConfigurationException("Port '{$port}' is not numeric");
             }
@@ -456,9 +456,7 @@ class Client
      */
     protected function putRequest($method, $uri, $params, $body)
     {
-        if (is_null($body)) {
-            throw new InvalidRequestException("body is required for '{$method}' requests");
-        }
+        $this->checkBody($body, $method);
 
         // put requests requires content-length header
         $this->setHttpHeader('Content-Length: ' . strlen($body));
@@ -479,14 +477,28 @@ class Client
      */
     protected function patchRequest($method, $uri, $params, $body)
     {
-        if (is_null($body)) {
-            throw new InvalidRequestException("body is required for '{$method}' requests");
-        }
+        $this->checkBody($body, $method);
 
         // put requests requires content-length header
         $this->setHttpHeader('Content-Length: ' . strlen($body));
 
         return $this->execute($method, $uri, $params, $body);
+    }
+
+    /**
+     * checks if body is not null
+     *
+     * @param mixed  $body   the body or null
+     * @param string $method the request method
+     *
+     * @return void
+     * @throws InvalidRequestException
+     */
+    protected function checkBody($body, $method)
+    {
+        if (is_null($body)) {
+            throw new InvalidRequestException("body is required for '{$method}' requests");
+        }
     }
 
     /**
@@ -710,14 +722,7 @@ class Client
      */
     protected function stripScheme($host)
     {
-        if (strpos($host, self::SCHEME_SSL) === 0) {
-            return substr($host, strlen(self::SCHEME_SSL));
-        }
-
-        if (strpos($host, self::SCHEME_PLAIN) === 0) {
-            return substr($host, strlen(self::SCHEME_PLAIN));
-        }
-        return $host;
+        return preg_replace("(^https?://)", "", $host);
     }
 
     /**
