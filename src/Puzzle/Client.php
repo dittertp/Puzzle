@@ -606,8 +606,8 @@ class Client
     /**
      * Sets a http option (e.g. use strict ssl)
      *
-     * @param int   $key   the curl option key
-     * @param mixed $value the value to set
+     * @param integer $key   the curl option key
+     * @param integer $value the value to set
      *
      * @return void
      */
@@ -818,7 +818,7 @@ class Client
      *
      * @return void
      */
-    protected function setHttpHeaders($headers)
+    protected function setHttpHeaders(array $headers)
     {
         $this->httpHeaders = $headers;
     }
