@@ -356,7 +356,7 @@ class Client
      *
      * @param string $method the request method
      * @param string $uri    the uri string
-     * @param array  $params the optional query string parameters
+     * @param mixed  $params the optional query string parameters
      * @param string $body   the (post) body
      *
      * @return mixed
@@ -378,7 +378,7 @@ class Client
      *
      * @param string $method the request method
      * @param string $uri    the uri
-     * @param string $params optional query string parameters
+     * @param mixed  $params optional query string parameters
      * @param string $body   body/post parameters
      *
      * @return string
@@ -396,7 +396,7 @@ class Client
      *
      * @param string $method the request method
      * @param string $uri    the uri
-     * @param string $params optional query string parameters
+     * @param mixed  $params optional query string parameters
      * @param string $body   body/post parameters
      *
      * @return string
@@ -412,7 +412,7 @@ class Client
      *
      * @param string $method the request method
      * @param string $uri    the uri
-     * @param string $params optional query string parameters
+     * @param mixed  $params optional query string parameters
      * @param string $body   body/post parameters
      *
      * @return string
@@ -430,7 +430,7 @@ class Client
      *
      * @param string $method the request method
      * @param string $uri    the uri
-     * @param string $params optional query string parameters
+     * @param mixed  $params optional query string parameters
      * @param string $body   body/post parameters
      *
      * @return string
@@ -448,7 +448,7 @@ class Client
      *
      * @param string $method the request method
      * @param string $uri    the uri
-     * @param string $params optional query string parameters
+     * @param mixed  $params optional query string parameters
      * @param string $body   body/post parameters
      *
      * @return string
@@ -471,7 +471,7 @@ class Client
      *
      * @param string $method the request method
      * @param string $uri    the uri
-     * @param string $params optional query string parameters
+     * @param mixed  $params optional query string parameters
      * @param string $body   body/post parameters
      *
      * @return string
@@ -494,7 +494,7 @@ class Client
      *
      * @param string $method the request method
      * @param string $uri    the uri
-     * @param array  $params optional query string parameters
+     * @param mixed  $params optional query string parameters
      * @param string $body   body/post parameters
      *
      * @return mixed
@@ -502,7 +502,7 @@ class Client
      * @throws Exceptions\ServerErrorException
      * @throws Exceptions\TransportException
      */
-    protected function execute($method, $uri, array $params, $body)
+    protected function execute($method, $uri, $params, $body)
     {
         $this->setMethod(strtoupper($method));
         $url = $this->buildUrl($uri, $params);
