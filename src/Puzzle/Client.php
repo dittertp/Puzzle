@@ -191,7 +191,7 @@ class Client
     public function setHost($host, $port = null)
     {
         $this->host = $host;
-        if ($port != null) {
+        if ($port !== null) {
             if (is_numeric($port)) {
                 $this->port = $port;
             } else {
@@ -494,7 +494,7 @@ class Client
      *
      * @param string $method the request method
      * @param string $uri    the uri
-     * @param string $params optional query string parameters
+     * @param array  $params optional query string parameters
      * @param string $body   body/post parameters
      *
      * @return mixed
@@ -502,7 +502,7 @@ class Client
      * @throws Exceptions\ServerErrorException
      * @throws Exceptions\TransportException
      */
-    protected function execute($method, $uri, $params, $body)
+    protected function execute($method, $uri, array $params, $body)
     {
         $this->setMethod(strtoupper($method));
         $url = $this->buildUrl($uri, $params);
@@ -523,6 +523,7 @@ class Client
 
         $this->checkForCurlErrors();
 
+        $response = array();
         $response["data"] = $this->getSerializer()->deserialize($result);
         $response["status"] = $this->getStatusCode();
 
