@@ -6,7 +6,6 @@ php:
   - 5.4
 
 before_install:
-  - printf "\n" | pecl install apcu-beta; echo 'apc.enable_cli=1' >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
   - wget https://scrutinizer-ci.com/ocular.phar
 
 script:
