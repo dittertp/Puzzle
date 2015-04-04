@@ -388,20 +388,15 @@ class Client
         switch ($method) {
             case "get":
                 return "getRequest";
-            break;
             case "post":
                 return "postRequest";
-                break;
             case "put":
             case "patch":
                 return "putRequest";
-                break;
             case "head":
                 return "headRequest";
-                break;
             case "delete":
                 return "deleteRequest";
-                break;
             default:
                 throw new InvalidRequestMethodException("invalid request method '{$method}' or not implemented");
         }
