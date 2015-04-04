@@ -70,12 +70,12 @@ class Client
     /**
      * @var array
      */
-    protected $httpOptions;
+    protected $httpOptions = array();
 
     /**
      * @var array
      */
-    protected $httpHeaders;
+    protected $httpHeaders = array();
 
     /**
      * @var string
@@ -93,10 +93,16 @@ class Client
     protected $scheme;
 
     /**
-     * creates class instance
+     * new class instance
+     *
+     * @param string $host the host
+     * @param mixed  $port (optional) the port
+     *
+     * @throws ConfigurationException
      */
-    public function __construct()
+    public function __construct($host, $port)
     {
+        $this->setHost($host, $port);
         $this->init();
     }
 
@@ -119,13 +125,8 @@ class Client
     protected function init()
     {
         $handle = curl_init();
-        if ($handle === false) {
-            throw new ServerErrorException("curl extension not loaded");
-        }
-        $this->handle = $handle;
 
-        $this->port = null;
-        $this->host = null;
+        $this->handle = $handle;
 
         $this->setSerializer(new DefaultSerializer());
         $this->scheme = self::SCHEME_PLAIN;
@@ -188,7 +189,7 @@ class Client
      * @return void
      * @throws \Puzzle\Exceptions\ConfigurationException
      */
-    public function setHost($host, $port = null)
+    protected function setHost($host, $port = null)
     {
         $this->host = $host;
         if ($port !== null) {
@@ -273,81 +274,86 @@ class Client
     /**
      * perform a put request
      *
-     * @param string $uri  uri string
-     * @param mixed  $body the "post" body
+     * @param string $uri    uri string
+     * @param mixed  $params optional query string parameters
+     * @param mixed  $body   the "post" body
      *
      * @return mixed
      * @throws ClientErrorResponseException
      * @throws ServerErrorResponseException
      * @throws \Exception
      */
-    public function put($uri, $body = null)
+    public function put($uri, $params = null, $body = null)
     {
-        return $this->performRequest("put", $uri, null, $body);
+        return $this->performRequest("put", $uri, $params, $body);
     }
 
     /**
      * perform a post request
      *
-     * @param string $uri  uri string
-     * @param mixed  $body the "post" body
+     * @param string $uri    uri string
+     * @param mixed  $params optional query string parameters
+     * @param mixed  $body   the "post" body
      *
      * @return mixed
      * @throws ClientErrorResponseException
      * @throws ServerErrorResponseException
      * @throws \Exception
      */
-    public function post($uri, $body = null)
+    public function post($uri, $params = null, $body = null)
     {
-        return $this->performRequest("post", $uri, null, $body);
+        return $this->performRequest("post", $uri, $params, $body);
     }
 
     /**
      * perform a patch
      *
-     * @param string $uri  uri string
-     * @param mixed  $body the "post" body
+     * @param string $uri    uri string
+     * @param mixed  $params optional query string parameters
+     * @param mixed  $body   the "post" body
      *
      * @return mixed
      * @throws ClientErrorResponseException
      * @throws ServerErrorResponseException
      * @throws \Exception
      */
-    public function patch($uri, $body = null)
+    public function patch($uri, $params = null, $body = null)
     {
-        return $this->performRequest("patch", $uri, null, $body);
+        return $this->performRequest("patch", $uri, $params, $body);
     }
 
     /**
      * perform a head request
      *
-     * @param string $uri  uri string
-     * @param mixed  $body the "post" body
+     * @param string $uri    uri string
+     * @param mixed  $params optional query string parameters
+     * @param mixed  $body   the "post" body
      *
      * @return mixed
      * @throws ClientErrorResponseException
      * @throws ServerErrorResponseException
      * @throws \Exception
      */
-    public function head($uri, $body = null)
+    public function head($uri, $params = null, $body = null)
     {
-        return $this->performRequest("head", $uri, null, $body);
+        return $this->performRequest("head", $uri, $params, $body);
     }
 
     /**
      * perform a delete request
      *
-     * @param string $uri  uri string
-     * @param mixed  $body the "post" body
+     * @param string $uri    uri string
+     * @param mixed  $params optional query string parameters
+     * @param mixed  $body   the "post" body
      *
      * @return mixed
      * @throws ClientErrorResponseException
      * @throws ServerErrorResponseException
      * @throws \Exception
      */
-    public function delete($uri, $body = null)
+    public function delete($uri, $params = null, $body = null)
     {
-        return $this->performRequest("delete", $uri, null, $body);
+        return $this->performRequest("delete", $uri, $params, $body);
     }
 
     /**
@@ -520,17 +526,14 @@ class Client
         $this->setUrl($url);
         $this->setBody($body);
 
-        if (!curl_setopt_array($this->getHandle(), $this->getOptions())) {
-            throw new TransportException("Error setting cURL request options.");
-        }
+        curl_setopt_array($this->getHandle(), $this->getOptions());
 
         if (!is_null($this->getHttpHeaders())) {
-            if (!curl_setopt($this->getHandle(), CURLOPT_HTTPHEADER, $this->getHttpHeaders())) {
-                throw new TransportException("Error setting cURL Header options.");
-            }
+            curl_setopt($this->getHandle(), CURLOPT_HTTPHEADER, $this->getHttpHeaders());
         }
 
-        $result = curl_exec($this->getHandle());
+        // wrap curl_exec for easier unit testing
+        $result = $this->curlExec();
 
         $this->checkForCurlErrors();
 
@@ -541,21 +544,29 @@ class Client
 
         if ($response['status'] >= 400 && $response['status'] < 500) {
             $statusCode = $response['status'];
-            $responseBody = $response["data"];
-            $exceptionText = "{$statusCode} Client Exception: {$responseBody}";
+            $exceptionText = "{$statusCode} Client Exception: {$result}";
 
             throw new ClientErrorException($exceptionText, $statusCode);
 
         } else if ($response['status'] >= 500) {
             $statusCode = $response['status'];
-            $responseBody = $response["data"];
-            $exceptionText = "{$statusCode} Server Exception: {$responseBody}";
+            $exceptionText = "{$statusCode} Server Exception: {$result}";
 
             throw new ServerErrorException($exceptionText, $statusCode);
         }
 
 
         return $response;
+    }
+
+    /**
+     * executes curl_exec
+     *
+     * @return mixed
+     */
+    protected function curlExec()
+    {
+        return curl_exec($this->getHandle());
     }
 
     /**
@@ -640,7 +651,7 @@ class Client
      * build complete url
      *
      * @param string $uri    uri string
-     * @param array  $params query string parameters
+     * @param mixed  $params query string parameters
      *
      * @return string
      */
@@ -654,11 +665,35 @@ class Client
 
         $url = $host . $uri;
 
-        foreach ($params as $key => $value) {
-            $url = $url . "?" . $key . "=" . $value;
+
+        if ($params === null) {
+            $params = array();
         }
 
+        $url .= $this->buildQueryString($params);
+
         return $url;
+    }
+
+    /**
+     * build the query string
+     *
+     * @param array $params query string parameters
+     *
+     * @return string
+     */
+    protected function buildQueryString(array $params)
+    {
+        $qs = "";
+        foreach ($params as $key => $value) {
+            if ($qs === "") {
+                $qs = "?";
+            } else {
+                $qs .= "&&";
+            }
+            $qs .= $key . "=" . $value;
+        }
+        return $qs;
     }
 
     /**
@@ -673,10 +708,6 @@ class Client
         $scheme = $this->getScheme();
         $host = $this->getHost();
         $port = $this->getPort();
-
-        if (is_null($host)) {
-            throw new ConfigurationException("no host was set");
-        }
 
         $hostString = $this->prepareHost($scheme, $host);
 
@@ -698,10 +729,6 @@ class Client
      */
     protected function prepareHost($scheme, $host)
     {
-        if (is_null($host)) {
-            throw new ConfigurationException("no host was set");
-        }
-
         $host = $this->stripScheme($host);
 
         if (substr($host, -1) === "/") {

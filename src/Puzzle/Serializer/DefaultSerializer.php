@@ -64,11 +64,14 @@ class DefaultSerializer implements SerializerInterface
      *
      * @param string $data JSON encoded string
      *
-     * @return array
+     * @return mixed
      */
     public function deserialize($data)
     {
-        return json_decode($data, true);
-
+        $result = json_decode($data, true);
+        if ($result === null) {
+            return $data;
+        }
+        return $result;
     }
 }
