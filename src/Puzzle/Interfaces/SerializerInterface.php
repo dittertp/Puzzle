@@ -48,7 +48,7 @@ interface SerializerInterface
      *
      * @param string $data JSON encoded string
      *
-     * @return array
+     * @return mixed
      */
     public function deserialize($data);
 }
