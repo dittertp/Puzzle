@@ -365,12 +365,17 @@ class Client
      * @param string $body   the (post) body
      *
      * @return mixed
+     * @throws Exceptions\InvalidRequestMethodException
      */
     protected function processRequest($method, $uri, $params = null, $body = null)
     {
         $methodString = $this->getMethod($method);
 
-        return $this->$methodString($method, $uri, $params, $body);
+        if (method_exists($this, $methodString)) {
+            return $this->$methodString($method, $uri, $params, $body);
+        } else {
+            throw new InvalidRequestMethodException("request method '{$method}' not implemented");
+        }
     }
 
     /**
@@ -379,27 +384,16 @@ class Client
      * @param string $method the request method
      *
      * @return string
-     * @throws Exceptions\InvalidRequestMethodException
      */
     protected function getMethod($method)
     {
         $method = strtolower($method);
 
-        switch ($method) {
-            case "get":
-                return "getRequest";
-            case "post":
-                return "postRequest";
-            case "put":
-            case "patch":
-                return "putRequest";
-            case "head":
-                return "headRequest";
-            case "delete":
-                return "deleteRequest";
-            default:
-                throw new InvalidRequestMethodException("invalid request method '{$method}' or not implemented");
+        if ($method === "patch") {
+            return "putRequest";
         }
+
+        return $method . "Request";
     }
 
     /**
