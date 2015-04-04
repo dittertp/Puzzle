@@ -365,16 +365,45 @@ class Client
      * @param string $body   the (post) body
      *
      * @return mixed
-     * @throws Exceptions\InvalidRequestMethodException
      */
     protected function processRequest($method, $uri, $params = null, $body = null)
     {
-        $methodString = strtolower($method) . "Request";
+        $methodString = $this->getMethod($method);
 
-        if (method_exists($this, $methodString)) {
-            return $this->$methodString($method, $uri, $params, $body);
-        } else {
-            throw new InvalidRequestMethodException("invalid request method '{$method}' or not implemented");
+        return $this->$methodString($method, $uri, $params, $body);
+    }
+
+    /**
+     * returns the request method
+     *
+     * @param string $method the request method
+     *
+     * @return string
+     * @throws Exceptions\InvalidRequestMethodException
+     */
+    protected function getMethod($method)
+    {
+        $method = strtolower($method);
+
+        switch ($method) {
+            case "get":
+                return "getRequest";
+            break;
+            case "post":
+                return "postRequest";
+                break;
+            case "put":
+            case "patch":
+                return "putRequest";
+                break;
+            case "head":
+                return "headRequest";
+                break;
+            case "delete":
+                return "deleteRequest";
+                break;
+            default:
+                throw new InvalidRequestMethodException("invalid request method '{$method}' or not implemented");
         }
     }
 
@@ -460,27 +489,6 @@ class Client
      * @throws \Puzzle\Exceptions\InvalidRequestException
      */
     protected function putRequest($method, $uri, $params, $body)
-    {
-        $this->checkBody($body, $method);
-
-        // put requests requires content-length header
-        $this->setHttpHeader('Content-Length: ' . strlen($body));
-
-        return $this->execute($method, $uri, $params, $body);
-    }
-
-    /**
-     * patch request implementation
-     *
-     * @param string $method the request method
-     * @param string $uri    the uri
-     * @param mixed  $params optional query string parameters
-     * @param string $body   body/post parameters
-     *
-     * @return string
-     * @throws \Puzzle\Exceptions\InvalidRequestException
-     */
-    protected function patchRequest($method, $uri, $params, $body)
     {
         $this->checkBody($body, $method);
 
