@@ -532,6 +532,23 @@ class Client
         // wrap curl_exec for easier unit testing
         $result = $this->curlExec();
 
+        $response = $this->prepareResponse($result);
+        
+        return $response;
+    }
+
+    /**
+     * prepares the response
+     *
+     * @param string $result the curl result
+     *
+     * @return array
+     * @throws ClientErrorException
+     * @throws ConnectionException
+     * @throws ServerErrorException
+     */
+    protected function prepareResponse($result)
+    {
         $this->checkForCurlErrors();
 
         $response = array();
@@ -551,7 +568,6 @@ class Client
 
             throw new ServerErrorException($exceptionText, $statusCode);
         }
-
 
         return $response;
     }
