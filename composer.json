@@ -3,7 +3,7 @@
   "description": "This curl rest client is a drop in replacement for guzzle while using the official php elasticsearch client",
   "keywords": ["curl","client", "rest"],
   "type": "library",
-  "license": "GNU General Public License, version 3 (GPL-3.0)",
+  "license": "GPL-3.0+",
   "authors": [
       {
           "name": "Philipp Dittert"
