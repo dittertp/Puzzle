@@ -247,10 +247,8 @@ class Client
                 $params,
                 $body
             );
-
         } catch (ClientErrorResponseException $exception) {
             throw $exception;
-
         } catch (ServerErrorResponseException $exception) {
             throw $exception;
         }
@@ -563,7 +561,6 @@ class Client
             $exceptionText = "{$statusCode} Client Exception: {$result}";
 
             throw new ClientErrorException($exceptionText, $statusCode);
-
         } else if ($response['status'] >= 500) {
             $statusCode = $response['status'];
             $exceptionText = "{$statusCode} Server Exception: {$result}";
