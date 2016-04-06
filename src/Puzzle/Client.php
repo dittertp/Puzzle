@@ -237,7 +237,9 @@ class Client
     {
         try {
             // serialize(json) body if it's not already a string
-            $body = $this->getSerializer()->serialize($body);
+            if ($body !== null) {
+                $body = $this->getSerializer()->serialize($body);
+            }
 
             return $this->processRequest(
                 $method,
